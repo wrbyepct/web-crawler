@@ -1,0 +1,1 @@
+console.log("everything is going well so far and trump is going to bee smashed by shit on his face, mark my words")
