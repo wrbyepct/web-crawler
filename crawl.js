@@ -1,10 +1,45 @@
 // Write a stubbed out function 
+
+const { JSDOM } = require('jsdom')
+function getURLsFromHTML(htmlBody, baseUrl){
+    const urls = []
+    const dom = new JSDOM(htmlBody) // This can convert a html body to a structured objects, so that we can easily access the properies of this html
+    const linkElements = dom.window.document.querySelectorAll('a') // This can access the information of the tag in html you specified
+
+    // In this case, you want to access the 'href' of the a 'tag'
+    // There are 3 scenarios of link.href
+    // One it's a invalid url -> Then use URL object to detect error
+    // Second is that it's relative url -> then concatenate the relative url with base url 
+    // Third, is that it's absoute url -> just return the urls 
+    for (const link of linkElements) {
+        if (link.href[0] === '/'){
+            // it's a relative url
+            try {
+                const urlObj = new URL(`${baseUrl}${link.href}`)
+                urls.push(urlObj.href)
+            } catch(err) {
+                console.log(`Error with relative url: ${err.message}`)
+            }
+            
+        } else {
+            // when it's a absolute url
+            try {
+                const urlObj = new URL(link.href)
+                urls.push(urlObj.href)
+            } catch(err) {
+                console.log(`Error with absolute url: ${err.message}`)
+            }
+            
+        }
+    }
+    return urls
+}
+
+
 function normalizeURL(urlString) {
     // First convert urlString to URL object using built-in URL constructor
     // Initiate a URL object
     const urlObj = new URL(urlString) 
-    console.log(urlObj.pathname)
-    console.log(urlObj.host)
     const hostPath = `${urlObj.hostname}${urlObj.pathname}`
 
     // There are 2 scenarios of host
@@ -20,5 +55,6 @@ function normalizeURL(urlString) {
 
 // Make the function availabe for other files
 module.exports = {
-    normalizeURL
+    normalizeURL,
+    getURLsFromHTML
 }
