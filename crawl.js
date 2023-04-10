@@ -1,6 +1,29 @@
 // Write a stubbed out function 
 
 const { JSDOM } = require('jsdom')
+
+async function crawlPage(curretnURL){
+    console.log(`Actively crawling ${curretnURL}`)
+    // Making the request to the  website 
+    try {
+        const res = await fetch(curretnURL)
+        console.log(await res.text())
+        if (res.status > 399) {
+            console.log(`error in fetch with status code ${res.status} on page: ${curretnURL}`)
+            return
+        }
+        // Get the content type of the page
+        const contentType = res.headers.get("content-type")
+        if (!contentType.includes("text/html")) {
+            console.log(`Not a html response, content type: ${contentType} on page: ${curretnURL}`)
+        }
+    } catch (err) {
+        // Handle invalid input
+        console.log(`error in fetch: ${err.message}, on page: ${curretnURL}`)
+    }
+    
+}
+
 function getURLsFromHTML(htmlBody, baseUrl){
     const urls = []
     const dom = new JSDOM(htmlBody) // This can convert a html body to a structured objects, so that we can easily access the properies of this html
@@ -56,5 +79,6 @@ function normalizeURL(urlString) {
 // Make the function availabe for other files
 module.exports = {
     normalizeURL,
-    getURLsFromHTML
+    getURLsFromHTML,
+    crawlPage
 }
