@@ -1,27 +1,57 @@
-// Write a stubbed out function 
 
 const { JSDOM } = require('jsdom')
 
-async function crawlPage(curretnURL){
+async function crawlPage(baseURL, curretnURL, pages){
+
+    const baseURLObj = new URL(baseURL)
+    const curretnURLObj = new URL(curretnURL)
+    
+    
+    // Check if the current crawlingURL is under the same domain of the baseURL
+    if (baseURLObj.hostname !== curretnURLObj.hostname){
+        return pages
+    }  
+    const normalizedURL = normalizeURL(curretnURL)
+
+    // Record how many time we've seen this url, for later to generate report
+    if (pages[normalizedURL] > 0 ) {
+        pages[normalizedURL]++
+        return pages
+    }
+    // Indicating the first time we've seen this url
+    pages[normalizedURL] = 1
+
     console.log(`Actively crawling ${curretnURL}`)
+
     // Making the request to the  website 
     try {
         const res = await fetch(curretnURL)
-        console.log(await res.text())
+        
         if (res.status > 399) {
             console.log(`error in fetch with status code ${res.status} on page: ${curretnURL}`)
-            return
+            return pages
         }
         // Get the content type of the page
         const contentType = res.headers.get("content-type")
         if (!contentType.includes("text/html")) {
             console.log(`Not a html response, content type: ${contentType} on page: ${curretnURL}`)
+            return pages
         }
+
+        const htmlBody = await res.text()
+
+        const urls = getURLsFromHTML(htmlBody, baseURL)
+
+        for (const nextURL of urls) {
+            pages = await crawlPage(baseURL, nextURL, pages)
+        }
+
     } catch (err) {
         // Handle invalid input
         console.log(`error in fetch: ${err.message}, on page: ${curretnURL}`)
+        return pages
     }
-    
+    return pages
 }
 
 function getURLsFromHTML(htmlBody, baseUrl){
@@ -63,6 +93,7 @@ function normalizeURL(urlString) {
     // First convert urlString to URL object using built-in URL constructor
     // Initiate a URL object
     const urlObj = new URL(urlString) 
+    // This strips away protocol, becaue we are not including it
     const hostPath = `${urlObj.hostname}${urlObj.pathname}`
 
     // There are 2 scenarios of host
