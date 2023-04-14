@@ -38,6 +38,7 @@ async function crawlPage(baseURL, curretnURL, pages){
             return pages
         }
 
+        // Get all a tags in this url and then crawl them and then record them 
         const htmlBody = await res.text()
 
         const urls = getURLsFromHTML(htmlBody, baseURL)
@@ -82,7 +83,6 @@ function getURLsFromHTML(htmlBody, baseUrl){
             } catch(err) {
                 console.log(`Error with absolute url: ${err.message}`)
             }
-            
         }
     }
     return urls
@@ -105,7 +105,6 @@ function normalizeURL(urlString) {
     return hostPath
 }
 
-// normalizeURL('https://www.facebook.com/')
 
 // Make the function availabe for other files
 module.exports = {
